@@ -21,10 +21,11 @@ class Model(pl.LightningModule):
             nn.Flatten(),
             nn.Linear(150, 64),
             nn.ReLU(),
-            nn.Linear(64, 1),
-            nn.Sigmoid()
+            nn.Linear(64, 3),
+            nn.Sigmoid(),
+            nn.Softmax(dim = 1)
         )
-        self.lossfunc = nn.CrossEntropyLoss()
+        self.lossfunc = nn.BCELoss()
 
     def forward(self,x):
         y = self.nn(x)
