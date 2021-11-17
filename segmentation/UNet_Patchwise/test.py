@@ -45,8 +45,7 @@ def predict(image, model):
 
     finalmask = finalmask[hWinSize:-hWinSize, hWinSize:-hWinSize]
     finalmask[finalmask > 1] = 1
-    
-    return finalmask
+    return finalmask, mask[hWinSize:-hWinSize, hWinSize:-hWinSize]
 
 
 if __name__ == '__main__':
@@ -55,22 +54,36 @@ if __name__ == '__main__':
     import os
 
     import glob
-    model = Model.load_from_checkpoint(r'lightning_logs\version_7\checkpoints\epoch=76-step=58211.ckpt')
+
+    model = Model.load_from_checkpoint(r'finalModel\epoch=78-step=59723.ckpt')
     model.eval()
     for i, path in enumerate(glob.glob(base + '*.jpg')):
-        # if i > 2:
-        #     continue
+        
         im = cv2.imread(path)
-        im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
-        masks = predict(im, model)
-        im[:, :, 2][masks > 0.5] = 255
-        # im[:, :, 1][masks < 0.5] = 0
-        # im[:, :, 0][masks < 0.5] = 0
-        # im[im == 0] = 255
-        cv2.imshow('a', im)
-        cv2.imshow('b', masks)
-        cv2.imwrite(f'outputs/{i}_1.jpg', im)
-        print('Complete')
+        if i >= 2:
+            im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
+            thresh = 0.5
+            continue
+        else:
+            im = cv2.resize(im, (0, 0), fx = 0.2, fy = 0.2)
+            thresh = 0.8
+
+        masks, overallmask = predict(im, model)
+
+        cv2.imwrite(f'toModel/{i}_img.jpg', im)
+        cv2.imwrite(f'toModel/{i}_stem.jpg',( masks * 255).astype(np.uint8))
+        cv2.imwrite(f'toModel/{i}_mask.jpg', overallmask)
+        
+        temp = im.copy()
+        temp[:, :, 2][masks > thresh] = 255
+        cv2.imwrite(f'outputs/{i}_illu.jpg', temp)
+
+        im[:, :, 0][masks < thresh] = 255
+        im[:, :, 1][masks < thresh] = 255
+        im[:, :, 2][masks < thresh] = 255
+        cv2.imwrite(f'outputs/{i}.jpg', im)
+
+        
         if cv2.waitKey(1) == ord('q'):
             exit()
 
