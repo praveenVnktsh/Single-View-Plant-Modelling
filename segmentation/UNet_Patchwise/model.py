@@ -110,10 +110,10 @@ class UNet(nn.Module):
         return logits
 
 class Model(pl.LightningModule):
-    def __init__(self, hparams):
+    def __init__(self, ):
         super().__init__()
-        self.hparams = hparams
-        self.nn = UNet(3, 3)
+        # self.hparams = hparams
+        self.nn = UNet(3, 1)
         self.lossfunc = nn.BCELoss()
 
     def forward(self,x):
@@ -130,7 +130,7 @@ class Model(pl.LightningModule):
         y = batch['target']
 
         out = self(x)
-        loss = self.lossfunc(out, y)
+        loss = self.lossfunc(out.squeeze(), y)
         return {
             'x' : x,
             'y' : y,
@@ -149,6 +149,14 @@ class Model(pl.LightningModule):
     def validation_step(self,batch,batch_idx):
         dic = self.runBatch(batch, batch_idx)
         loss = dic['loss']
+        if batch_idx == self.current_epoch % 60:
+            pred = dic['pred'][:10]
+            x = dic['x'][:10]
+            y = dic['y'][:10]
+            pred = torch.stack((pred, pred, pred), dim=1).float().squeeze()
+            y = torch.stack((y, y, y), dim=1).float().squeeze()
+            data = torch.cat((x.squeeze(), pred.squeeze(), y.squeeze()), dim = 2)
+            self.logger.experiment.add_images('valimg', data.cpu(), self.current_epoch)
 
         self.log('val_loss', loss)
 

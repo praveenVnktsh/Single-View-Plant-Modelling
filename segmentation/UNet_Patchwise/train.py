@@ -3,6 +3,8 @@ from model import Model
 
 from dataLoader import CustomDataset, LitCustomData
 import pytorch_lightning as pl
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 
 if __name__ == '__main__':
     hparams = {
@@ -10,6 +12,6 @@ if __name__ == '__main__':
     }
     dataset = LitCustomData()
     model = Model(hparams)
-    dataset.start(r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\trainData/winData/')
+    dataset.start(r'/home/oreo/temp/winData/')
     trainer = pl.Trainer(gpus=1, max_epochs=100)
     trainer.fit(model, dataset)

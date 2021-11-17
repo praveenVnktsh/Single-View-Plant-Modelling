@@ -19,21 +19,21 @@ class CustomDataset(Dataset):
     def __init__(self, paths):
         self.paths = paths
         self.length = len(self.paths)
-        self.transforms = A.Compose(
-            [
-                A.Resize(30, 30),
-                # A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
-                A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
-                A.RandomBrightnessContrast(p=0.5),
-                albumentations.pytorch.transforms.ToTensorV2(),
-            ]
-        )
-        self.transformsMask = A.Compose(
-            [
-                A.Resize(30, 30),
-                albumentations.pytorch.transforms.ToTensorV2(),
-            ]
-        )
+        # self.transforms = A.Compose(
+        #     [
+        #         A.Resize(30, 30),
+        #         # A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
+        #         A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
+        #         A.RandomBrightnessContrast(p=0.5),
+        #         albumentations.pytorch.transforms.ToTensorV2(),
+        #     ]
+        # )
+        self.transforms = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((30, 30)),
+            transforms.ToTensor(),
+        ])
+        
 
     def __len__(self):
         return self.length
@@ -41,13 +41,16 @@ class CustomDataset(Dataset):
     def __getitem__(self, index):
 
         inp = cv2.imread(self.paths[index][0])
+        
+        
+        if 'leaf' in self.paths[index][1]:
+            target = np.zeros(inp.shape[:2], dtype = np.uint8)
+        else:
+            target = cv2.imread(self.paths[index][1], 0)
+            
+        target = self.transforms(target).squeeze()
         inp = cv2.cvtColor(inp, cv2.COLOR_BGR2RGB)
-        inp = self.transforms(image = inp)['image'].float()
-        
-        
-        target = cv2.imread(self.paths[index][1], 0)
-        target = cv2.cvtColor(target, cv2.COLOR_BGR2RGB)
-        target = self.transformsMask(image = target)['image'].float()
+        inp = self.transforms(inp).float()
 
         return {
             "input": inp,
@@ -80,7 +83,7 @@ class LitCustomData(pl.LightningDataModule):
         self.stempaths = zip(self.stempaths, self.stemMaskpaths)
         self.leafPaths = zip(self.leafPaths, self.leafMaskPaths)
 
-        data = list(self.bgPaths) + list(self.stempaths) + list(self.leafPaths)
+        data = list(self.bgPaths) + list(self.stempaths)+ list(self.leafPaths)
 
         random.shuffle(data)
 

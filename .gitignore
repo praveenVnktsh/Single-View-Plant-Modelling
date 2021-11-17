@@ -7,3 +7,4 @@
 *.ckpt
 *.yaml
 *.tfevents.*
+trainData/winData.zip

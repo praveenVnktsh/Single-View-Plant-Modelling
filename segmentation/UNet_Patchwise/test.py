@@ -1,55 +1,77 @@
 import torch
 from functions import *
+from torchvision.transforms import transforms
+from tqdm import tqdm
+from model import Model
+def predict(image, model):
 
-def predict(image):
+    transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((30, 30)),
+            transforms.ToTensor(),
+        ])
 
-    mask = threshold(image, lg= np.array([25, 20, 20]), ug = np.array([86, 255, 255]))
+
+    winsize = 30
+    h, w, c = image.shape
+    mask = threshold(image, lg= np.array([25, 40, 40]), ug = np.array([86, 255, 255]))
+    
+
     mask = grabcut(image, mask)
+    cv2.imshow('a', mask)
+    cv2.waitKey(1)
 
     hWinSize = 16
 
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     mask = cv2.copyMakeBorder(mask, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
     image = cv2.copyMakeBorder(image, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
 
-    x, y, indices = sampleGrid(mask, step = 3, viz = False)
-
+    x, y, indices = sampleGrid(mask, step = 10, viz = False)
+    finalmask = np.zeros_like(mask).astype(np.float)
     mask = np.stack((mask, mask, mask), axis = 2)
-    plantSeg = ((mask.astype(float)/255) * image).astype(np.uint8)
 
-    leaves = np.zeros_like(plantSeg)
-    stems = np.zeros_like(plantSeg)
+    
     
 
-    classWindow = 10
-    for point in list(zip(y, x)):
+    for point in tqdm(list(zip(y, x))):
         yy, xx = point
         window = image[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize]
-        H = hog(window)
-        label = model.predict(H.reshape(1, 324))
-        if label == 1:
-            stems[yy - classWindow : yy + classWindow, xx - classWindow : xx + classWindow] = 255
-            leaves[yy - classWindow : yy + classWindow, xx - classWindow : xx + classWindow] = 0
-        else:
-            stems[yy - classWindow : yy + classWindow, xx - classWindow : xx + classWindow] = 0
-            leaves[yy - classWindow : yy + classWindow, xx - classWindow : xx + classWindow] = 255
+        # cv2.imshow('a', window)
+        # cv2.waitKey(1)
+        window = transform(window).unsqueeze(0)
+        pred = model(window)
+        finalmask[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize] += cv2.resize((pred.squeeze().cpu().detach().numpy()), (32, 32))
 
-
-    stems = stems & mask
-    leaves = leaves & mask
-    return stems, leaves
+    finalmask = finalmask[hWinSize:-hWinSize, hWinSize:-hWinSize]
+    finalmask[finalmask > 1] = 1
+    
+    return finalmask
 
 
 if __name__ == '__main__':
-    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\trainData/'
+    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\testData/'
     import torch
-    data = torch.load(base + 'dict_tripartite.pt')
-    model = torch.load('30k_085.pt')
+    import os
 
-    for i in range(data['length']):
-        stems, leaves = predict(data['images'][i])
-        cv2.imshow('a', stems)
-        cv2.imshow('b', leaves)
-        if cv2.waitKey(0) == ord('q'):
+    import glob
+    model = Model.load_from_checkpoint(r'lightning_logs\version_7\checkpoints\epoch=76-step=58211.ckpt')
+    model.eval()
+    for i, path in enumerate(glob.glob(base + '*.jpg')):
+        # if i > 2:
+        #     continue
+        im = cv2.imread(path)
+        im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
+        masks = predict(im, model)
+        im[:, :, 2][masks > 0.5] = 255
+        # im[:, :, 1][masks < 0.5] = 0
+        # im[:, :, 0][masks < 0.5] = 0
+        # im[im == 0] = 255
+        cv2.imshow('a', im)
+        cv2.imshow('b', masks)
+        cv2.imwrite(f'outputs/{i}_1.jpg', im)
+        print('Complete')
+        if cv2.waitKey(1) == ord('q'):
             exit()
 
 

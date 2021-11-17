@@ -54,6 +54,7 @@ if __name__ == '__main__':
     import os
 
     import glob
+    
     modelname = f'RBF SVM_91_20000'
     # modelname = 'Nearest Neighbors_90_30000'
     model = torch.load(f'binary/{modelname}.pt')
