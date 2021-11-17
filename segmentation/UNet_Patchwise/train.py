@@ -13,4 +13,3 @@ if __name__ == '__main__':
     dataset.start(r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\trainData/winData/')
     trainer = pl.Trainer(gpus=1, max_epochs=100)
     trainer.fit(model, dataset)
-    

@@ -2,3 +2,8 @@
 *.png
 *.pt
 *.ckpt
+
+*.pyc
+*.ckpt
+*.yaml
+*.tfevents.*

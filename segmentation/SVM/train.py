@@ -24,31 +24,31 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 names = [
-    # "Nearest Neighbors",
-    # "Linear SVM",
-    # "RBF SVM",
-    "Gaussian Process",
-    # "Decision Tree",
-    # "Random Forest",
-    # "Neural Net",
-    # "AdaBoost",
-    # "Naive Bayes",
-    # "QDA",
+    "Nearest Neighbors",
+    "Linear SVM",
+    "RBF SVM",
+    # "Gaussian Process",
+    "Decision Tree",
+    "Random Forest",
+    "Neural Net",
+    "AdaBoost",
+    "Naive Bayes",
+    "QDA",
 ]
 
 
 
 classifiers = [
-    # KNeighborsClassifier(3),
-    # SVC(kernel="linear", C=0.025),
-    # SVC(gamma=2, C=1),
-    GaussianProcessClassifier(1.0 * RBF(1.0)),
-    # DecisionTreeClassifier(max_depth=5),
-    # RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-    # MLPClassifier(alpha=1, max_iter=1000),
-    # AdaBoostClassifier(),
-    # GaussianNB(),
-    # QuadraticDiscriminantAnalysis(),
+    KNeighborsClassifier(3),
+    SVC(kernel="linear", C=0.025),
+    SVC(gamma=2, C=1),
+    # GaussianProcessClassifier(1.0 * RBF(1.0)),
+    DecisionTreeClassifier(max_depth=5),
+    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+    MLPClassifier(alpha=1, max_iter=1000),
+    AdaBoostClassifier(),
+    GaussianNB(),
+    QuadraticDiscriminantAnalysis(),
 ]
 
 
@@ -65,11 +65,10 @@ def fitSVM():
     data = stemBuffers + leafBuffers
     random.shuffle(data)
     
-    
-    data = data[:30000]
-    x = [d['feature'] for d in data]
-    y = [d['label'] for d in data]
-    print(sum(y), len(y))
+    dataLen = 30000
+    data = data[:dataLen]
+    x = np.array([np.array(d['feature']) for d in data])
+    y = np.array([d['label'] for d in data])
 
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.1,)
 
@@ -84,7 +83,7 @@ def fitSVM():
         print(name, ':',  accuracy)
 
 
-    torch.save(clf, 'svm.pt')
+        torch.save(clf, f'binary/{name}_{int(round(accuracy,2)*100)}_{dataLen}.pt')
     return clf
 
 pred = fitSVM()
