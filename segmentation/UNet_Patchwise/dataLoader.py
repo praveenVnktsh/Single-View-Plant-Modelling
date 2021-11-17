@@ -19,15 +19,6 @@ class CustomDataset(Dataset):
     def __init__(self, paths):
         self.paths = paths
         self.length = len(self.paths)
-        # self.transforms = A.Compose(
-        #     [
-        #         A.Resize(30, 30),
-        #         # A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
-        #         A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
-        #         A.RandomBrightnessContrast(p=0.5),
-        #         albumentations.pytorch.transforms.ToTensorV2(),
-        #     ]
-        # )
         self.transforms = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((30, 30)),
