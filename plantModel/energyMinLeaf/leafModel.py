@@ -49,18 +49,18 @@ def getCircle(centroid):
     centroid = np.array(centroid, dtype= int)
     forwardRope = getRope(centroid + np.array([-dist, -dist]), centroid  + np.array([dist, -dist]), slackstop = 2, slacksbtm = 2)
     backwardRope = getRope(centroid + np.array([dist, -dist + 1]), centroid  + np.array([dist, dist]), slackstop = 2, slacksbtm = 2)
-    r3 = getRope((880, 302), (880, 328), slackstop = 3, slacksbtm = 3)
+    # r3 = getRope((880, 302), (880, 328), slackstop = 3, slacksbtm = 3)
     # r4 = getRope((730, 328), (722, 275), slackstop = 3, slacksbtm = 3)
     
     backwardRope[-1].connect(forwardRope[0])
-    forwardRope[-1].connect(r3[0])
-    r3[-1].connect(backwardRope[0])
+    forwardRope[-1].connect(backwardRope[0])
+    # r3[-1].connect(backwardRope[0])
     # r4[0].connect(backwardRope[-1])
 
     
     leaf += forwardRope
     leaf += backwardRope
-    leaf += r3
+    # leaf += r3
 
     return leaf
 
@@ -89,11 +89,11 @@ class Leaf:
 
 
 
-        self.leaf : List[Node] = getCircle((878, 136))
+        self.leaf : List[Node] = getCircle((34, 351))
         
         # self.leaf += r4
 
-        self.stem : List[Node] = getRope((823, 160), (804, 704), slackstop = 20, slacksbtm = 20, gradation = True)
+        self.stem : List[Node] = getRope((51, 100), (200, 600), slackstop = 20, slacksbtm = 20, gradation = True)
         self.stem[0].connect(self.leaf[0])
         self.leaf[0].coeffs = [0, 1]
 

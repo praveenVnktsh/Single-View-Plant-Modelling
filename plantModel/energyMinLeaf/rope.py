@@ -7,6 +7,7 @@ from node import Node
 from node import dt
 import cv2
 import numpy as np
+
 class Rope:
     def __init__(self, nodes : List[Node]):
 

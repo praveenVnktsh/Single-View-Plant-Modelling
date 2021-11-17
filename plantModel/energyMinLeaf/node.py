@@ -4,6 +4,7 @@ from vector import Vector
 import numpy as np
 import cv2
 dt = 0.1
+
 class Node:
 
     def __init__(self, x, y, coeffs = [1, 1] ):

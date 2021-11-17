@@ -1,6 +1,6 @@
 from leafModel import Leaf
 # from loader import Loader
-from imgloader import Loader
+from maskLoader import Loader
 from typing import List
 from node import Node
 from utils import scaleAndShow
@@ -11,23 +11,20 @@ import matplotlib.pyplot as plt
 import imageio
 import time
 
-loader = Loader(r'E:\Google Drive\Acads\Mitacs\dataset\Cam 202106\A1-1/*.jpg')
+loader : Loader = Loader(r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\testData\toModel/')
 
-a = loader.getNextImage(split = True)
+loader.getNextImage()
 
-img, allmask = a
-
-
-
-stemmask = loader.getStem()
+stemmask = loader.stem
 stemdist = cv2.distanceTransform(255 - stemmask, cv2.DIST_L2, 3).astype(float) #- cv2.distanceTransform(stemmask, cv2.DIST_L2, 3).astype(float)
 stemdist -= stemdist.min()
 
-leafmask = loader.getLeaves()
 
+leafmask = loader.leaves
 leafdist =  cv2.distanceTransform(leafmask, cv2.DIST_L2, 3).astype(float)
 leafdist -= leafdist.min()
 
+img = loader.image
 img[:, :, 2][leafmask == 255] = 128
 img[:, :, 1][stemmask == 255] = 128
 
