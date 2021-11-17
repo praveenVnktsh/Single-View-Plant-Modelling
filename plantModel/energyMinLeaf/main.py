@@ -25,8 +25,6 @@ leafdist =  cv2.distanceTransform(leafmask, cv2.DIST_L2, 3).astype(float)
 leafdist -= leafdist.min()
 
 img = loader.image
-img[:, :, 2][leafmask == 255] = 128
-img[:, :, 1][stemmask == 255] = 128
 
 leaf  = Leaf()
 

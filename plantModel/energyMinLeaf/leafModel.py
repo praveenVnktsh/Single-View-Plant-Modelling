@@ -23,7 +23,7 @@ def getRope(pt1, pt2, mask = None, slackstop = 50, slacksbtm = 50, gradation = F
     
     for i in range(1, len(rope)):
         rope[i].connect(rope[i-1])
-        rope[i].coeffs = [1, 1]
+        rope[i].coeffs = [4, 0.5]
 
 
     if gradation:
@@ -47,20 +47,23 @@ def getCircle(centroid):
     leaf = []
     dist = 100
     centroid = np.array(centroid, dtype= int)
-    forwardRope = getRope(centroid + np.array([-dist, -dist]), centroid  + np.array([dist, -dist]), slackstop = 2, slacksbtm = 2)
-    backwardRope = getRope(centroid + np.array([dist, -dist + 1]), centroid  + np.array([dist, dist]), slackstop = 2, slacksbtm = 2)
+    r1 = getRope(centroid + np.array([-dist, -dist]), centroid  + np.array([dist, -dist]), slackstop = 1, slacksbtm = 1)
+    r2 = getRope(centroid + np.array([dist, -dist + 1]), centroid  + np.array([dist, dist]), slackstop = 1, slacksbtm = 1)
+    r3 = getRope(centroid + np.array([dist, dist + 1]), centroid  + np.array([dist, -dist]), slackstop = 1, slacksbtm = 1)
+
     # r3 = getRope((880, 302), (880, 328), slackstop = 3, slacksbtm = 3)
     # r4 = getRope((730, 328), (722, 275), slackstop = 3, slacksbtm = 3)
     
-    backwardRope[-1].connect(forwardRope[0])
-    forwardRope[-1].connect(backwardRope[0])
+    r2[-1].connect(r1[0])
+    r1[-1].connect(r3[0])
+    r3[-1].connect(r2[0])
     # r3[-1].connect(backwardRope[0])
     # r4[0].connect(backwardRope[-1])
 
     
-    leaf += forwardRope
-    leaf += backwardRope
-    # leaf += r3
+    leaf += r1
+    leaf += r2
+    leaf += r3
 
     return leaf
 
@@ -87,13 +90,13 @@ class Leaf:
 
         self.stem = Node(300, 300)
 
+        center  = (74, 205)
 
-
-        self.leaf : List[Node] = getCircle((34, 351))
+        self.leaf : List[Node] = getCircle(center)
         
         # self.leaf += r4
 
-        self.stem : List[Node] = getRope((51, 100), (200, 600), slackstop = 20, slacksbtm = 20, gradation = True)
+        self.stem : List[Node] = getRope(center, (200, 600), slackstop = 20, slacksbtm = 20, gradation = True)
         self.stem[0].connect(self.leaf[0])
         self.leaf[0].coeffs = [0, 1]
 
