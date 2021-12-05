@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import imageio
 import time
 
+from vector import Vector
+
 loader : Loader = Loader(r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\segmentation\UNet_Patchwise\toModel\old/')
 
 loader.getNextImage()
@@ -94,7 +96,10 @@ for cnt in contours:
 
 vizimg = img.copy()
 for leaf in leaves:
-    leaf.attract(leaves)
+    if leaf.stem[-1].vector[1] < 400:
+
+        leaf.attract(leaves, vizimg)
+        scaleAndShow(vizimg, 'leaf', waitkey= 0)
     
 
 model = Model(leaves)
