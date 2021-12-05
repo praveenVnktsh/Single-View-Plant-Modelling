@@ -68,11 +68,22 @@ for cnt in contours:
     else:
         angle = angle + 90
 
-    if angle > 90:
-        leaf = Leaf(centroid = (600, 50), base = (50,600), slack = int(7 * (area/maxArea)))
-    else:
-        leaf = Leaf(centroid = (50,50), base = (600, 600), slack = int(7 * (area/maxArea)))
-        
+    majorAxis = max(axes)
+    minorAxis = min(axes)
+    slack = 10
+    center = list(center)
+    top = center.copy()
+    top[0] -= np.cos(np.deg2rad(angle)) * (majorAxis + 10)
+    top[1] -= np.sin(np.deg2rad(angle)) * (majorAxis + 10)
+
+    bottom = center.copy()
+    bottom[0] += np.cos(np.deg2rad(angle)) * (majorAxis + 10)
+    bottom[1] += np.sin(np.deg2rad(angle)) * (majorAxis + 10)
+    leaf = Leaf(
+        centroid = top ,
+        base = bottom, 
+        slack = int(slack * (area/maxArea))
+    )
     stemDist, tempMask = getDistMask(tempimg, invert = True)
     
     vizimg = leaf.isConverged(stemDist, stemDist, vizimg)
@@ -84,6 +95,7 @@ for cnt in contours:
 vizimg = img.copy()
 for leaf in leaves:
     leaf.attract(leaves)
+    
 
 model = Model(leaves)
 vizimg = img.copy()

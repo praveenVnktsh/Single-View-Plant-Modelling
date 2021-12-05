@@ -9,7 +9,7 @@ class Loader():
 
     def __init__(self, base):
         self.base = base
-        self.i = 3
+        self.i = 0
         self.stem = None
         self.image = None
         self.mask = None
