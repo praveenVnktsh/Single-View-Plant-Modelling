@@ -112,7 +112,7 @@ class Leaf:
         
         # self.leaf += r4
 
-        self.stem : List[Node] = getRope(center, base, slackstop = 10, slacksbtm = 10, gradation = True)
+        self.stem : List[Node] = getRope(center, base, slackstop = 4, slacksbtm = 4, gradation = True)
         # self.stem[0].connect(self.leaf[0])
         # self.leaf[0].coeffs = [1, 1]
 
