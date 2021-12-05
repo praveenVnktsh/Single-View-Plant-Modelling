@@ -9,6 +9,36 @@ from skimage import exposure
 from skimage import feature
 import scipy.ndimage as ndi
 
+def removeBranches(skeleton, mask):
+    selems = list()
+    selems.append(np.array([[0, 1, 0], [1, 1, 1], [0, 0, 0]]))
+    selems.append(np.array([[1, 0, 1], [0, 1, 0], [1, 0, 0]]))
+    selems.append(np.array([[1, 0, 1], [0, 1, 0], [0, 1, 0]]))
+    selems.append(np.array([[0, 1, 0], [1, 1, 0], [0, 0, 1]]))
+    selems.append(np.array([[0, 0, 1], [1, 1, 1], [0, 1, 0]]))
+    selems += [np.rot90(selems[i], k=j) for i in range(5) for j in range(4)]
+
+    selems.append(np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]]))
+    selems.append(np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]]))
+
+    branches = np.zeros_like(skeleton, dtype=bool)
+    for selem in selems:
+        branches |= ndi.binary_hit_or_miss(skeleton, selem)
+    skeleton = skeleton.astype(np.uint8)*255
+    branches = branches.astype(np.uint8)*255
+    y, x = np.where(branches == 255)
+    for p in list(zip(x, y)):
+        cv2.circle(mask, p, 15, 0, -1)
+    # skeleton[branches == 255] = 0
+
+    return mask
+
+
+def skeletonize(mask):
+    mask[mask == 255] = 1
+    skeleton = sk(mask)
+
+    return skeleton
 
 
 def sampleGrid(mask, step = 5, viz = True):

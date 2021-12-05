@@ -1,3 +1,4 @@
+from functions import removeBranches, skeletonize
 from jointModel import Model
 from leafModel import Leaf
 # from loader import Loader
@@ -57,6 +58,27 @@ img = loader.image
 leaves : List[Leaf] = []
 vizimg = img.copy()
 vizimg[:, :, 1][stemmask == 255] = 255
+
+for cnt in contours:
+    area = cv2.contourArea(cnt)
+    if area < 0.01 * maxArea:
+        continue
+    tempimg = np.zeros_like(leafmask)
+    cv2.drawContours(tempimg, [cnt], -1, 255, -1)
+    if area > 0.3 * maxArea:
+        t = skeletonize(tempimg)
+        stemmask = removeBranches(t, stemmask)
+
+scaleAndShow(stemmask, waitkey=0)
+contours, hierarchy = cv2.findContours(stemmask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+maxArea = 0
+for cnt in contours:
+    area = cv2.contourArea(cnt)
+    if area > maxArea:
+        maxArea = area
+        maxCnt = cnt
+
 
 for cnt in contours:
     area = cv2.contourArea(cnt)
