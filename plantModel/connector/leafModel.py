@@ -206,15 +206,16 @@ class Leaf:
             if leaf is not self:
                 for i in range(len(leaf.stem)):
                     thetaval = vecSlope(leaf.stem[i].vector[0], leaf.stem[i].vector[1]) 
-                    if (leaf.stem[i].vector - self.stem[-1].vector).norm() < 30 or min(theta1, theta2) < thetaval < max(theta1, theta2):
+                    if (i == 0 and (leaf.stem[i].vector - self.stem[-1].vector).norm() < 30) or min(theta1, theta2) < thetaval < max(theta1, theta2):
                         if vizimg is not None:
                             cv2.line(vizimg, (int(x1), int(y1)), (int(leaf.stem[i].vector[0]), int(leaf.stem[i].vector[1])), (255, 0, 0), 1)
-                        dist = (leaf.stem[0].vector - self.stem[-1].vector).norm()
+                        dist = (leaf.stem[i].vector - self.stem[-1].vector).norm()
                         if dist < mins[1]:
                             mins[0] = leaf.stem[i]
+                            if i == 0:
+                                dist = dist / 10
                             mins[1] = dist
 
-        print(mins[0], mins[1])
         if mins[0] is not None and mins[1] < 400:
             self.stem[-1].connect(mins[0])
             self.stem[-1].coeffs = [1, 1]
