@@ -28,8 +28,8 @@ def getDistMask(mask, invert = False):
     
     mask = cv2.morphologyEx(mask,cv2.MORPH_OPEN,kernel, iterations = 2)
 
-    mask[mask > 200] = 255
-    mask[mask < 200] = 0
+    mask[mask > 120] = 255
+    mask[mask < 120] = 0
     if invert:
         leafdist =  cv2.distanceTransform(255 - mask, cv2.DIST_L2, 3).astype(float)
     else:
@@ -56,8 +56,7 @@ for cnt in contours:
 
 img = loader.image
 leaves : List[Leaf] = []
-vizimg = img.copy()
-vizimg[:, :, 1][stemmask == 255] = 255
+
 
 for cnt in contours:
     area = cv2.contourArea(cnt)
@@ -68,8 +67,7 @@ for cnt in contours:
     if area > 0.3 * maxArea:
         t = skeletonize(tempimg)
         stemmask = removeBranches(t, stemmask)
-
-scaleAndShow(stemmask, waitkey=0)
+scaleAndShow(stemmask, waitkey=1)
 contours, hierarchy = cv2.findContours(stemmask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
 maxArea = 0
@@ -80,6 +78,8 @@ for cnt in contours:
         maxCnt = cnt
 
 
+vizimg = img.copy()
+vizimg[:, :, 1][stemmask == 255] = 255
 for cnt in contours:
     area = cv2.contourArea(cnt)
     if area < 0.01 * maxArea:
@@ -115,8 +115,6 @@ for cnt in contours:
     leaves.append(leaf)
 
 
-
-vizimg = img.copy()
 for leaf in leaves:
     if leaf.stem[-1].vector[1] < 400:
 

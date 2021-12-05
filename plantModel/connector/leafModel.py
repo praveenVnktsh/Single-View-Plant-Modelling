@@ -157,7 +157,7 @@ class Leaf:
         x2, y2 = self.stem[-2].vector
 
         theta = np.arctan2(y1 - y2, x1 - x2)
-        diff = 50
+        diff = 60
 
         theta1 = theta + np.deg2rad(diff)
         theta2 = theta - np.deg2rad(diff)
@@ -185,7 +185,7 @@ class Leaf:
                 if min(theta1, theta2) < thetaval < max(theta1, theta2):
                     if vizimg is not None:
                         cv2.line(vizimg, (int(x1), int(y1)), (int(leaf.stem[0].vector[0]), int(leaf.stem[0].vector[1])), (255, 0, 255), 1)
-
+                    # scaleAndShow(vizimg, "attract", waitkey=0)
                     dist = (leaf.stem[0].vector - self.stem[-1].vector).norm()
                     if dist < mins[1]:
                         mins[0] = leaf.stem[0]

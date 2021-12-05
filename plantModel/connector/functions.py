@@ -28,7 +28,8 @@ def removeBranches(skeleton, mask):
     branches = branches.astype(np.uint8)*255
     y, x = np.where(branches == 255)
     for p in list(zip(x, y)):
-        cv2.circle(mask, p, 15, 0, -1)
+        # cv2.circle(mask, p, 15, 0, -1)
+        mask[p[1] - 15 : p[1] + 15, p[0] - 15: p[0] + 15] = 0
     # skeleton[branches == 255] = 0
 
     return mask
