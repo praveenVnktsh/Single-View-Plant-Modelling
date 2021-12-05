@@ -151,6 +151,7 @@ class Leaf:
 
     def attract(self, leaves):
 
+        
         for leaf in leaves:
             if leaf is not self:
                 if (leaf.stem[0].vector - self.stem[-1].vector).norm() < 50:
@@ -158,18 +159,6 @@ class Leaf:
                     self.stem[-1].coeffs = [1, 1]
                     leaf.stem[0].coeffs = [1, 1]
                     return True
-
-        # minval = [leaf.stem[0], 10000]
-        # for leaf in leaves:
-        #     if leaf is not self:
-        #         for node in leaf.stem:
-        #             dist = (node.vector - self.stem[-1].vector).norm()
-        #             if dist < minval[1]:
-        #                 minval[0] = node
-                    
-        #         self.stem[-1].connect(minval[0])
-        #         self.stem[-1].coeffs = [1, 1]
-        #         minval[0].coeffs = [1, 1]
 
     def isConverged(self, gradimg, stemGrad, vizimg):
         i = 0
