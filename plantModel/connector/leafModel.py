@@ -84,7 +84,7 @@ def getCircle(centroid):
 
 class Leaf:
 
-    def __init__(self, centroid = None, base = None):
+    def __init__(self, centroid = None, base = None, slack = 10):
         
 
         self.tiplength = 30
@@ -112,7 +112,7 @@ class Leaf:
         
         # self.leaf += r4
 
-        self.stem : List[Node] = getRope(center, base, slackstop = 4, slacksbtm = 4, gradation = True)
+        self.stem : List[Node] = getRope(center, base, slackstop = slack, slacksbtm = slack, gradation = True)
         # self.stem[0].connect(self.leaf[0])
         # self.leaf[0].coeffs = [1, 1]
 
@@ -137,11 +137,27 @@ class Leaf:
         # cv2.circle(vizimg, (int(mainCentroid[0]), int(mainCentroid[1])), 5, (255, 0,0 ), -1)
 
         distances = 0
-        for node in self.stem:
-            vizimg, dist = node.step(stemGrad, vizimg, color = (0, 0, 255))
+        for i, node in enumerate(self.stem):
+            if i == 0:
+                color = (255, 0, 0)
+            elif i == len(self.stem) - 1:
+                color = (255, 255, 255)
+            else:
+                color = (0, 0, 255)
+            vizimg, dist = node.step(stemGrad, vizimg, color = color)
             distances += dist
 
         return vizimg, distances
+
+    def attract(self, leaves):
+
+        for leaf in leaves:
+            if leaf is not self:
+                if (leaf.stem[0].vector - self.stem[-1].vector).norm() < 50:
+                    self.stem[-1].connect(leaf.stem[0])
+                    self.stem[-1].coeffs = [1, 1]
+                    leaf.stem[0].coeffs = [1, 1]
+        
 
     def isConverged(self, gradimg, stemGrad, vizimg):
         i = 0

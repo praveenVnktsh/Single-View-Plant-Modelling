@@ -1,3 +1,4 @@
+from jointModel import Model
 from leafModel import Leaf
 # from loader import Loader
 from maskLoader import Loader
@@ -37,7 +38,7 @@ def getDistMask(mask, invert = False):
 
 
 stemmask = loader.stem
-netStemDist, stemmask = getDistMask(stemmask)
+netStemDist, stemmask = getDistMask(stemmask, invert = True)
 
 
 contours, hierarchy = cv2.findContours(stemmask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -51,12 +52,13 @@ for cnt in contours:
 
 
 img = loader.image
-leaves = []
+leaves : List[Leaf] = []
 vizimg = img.copy()
 vizimg[:, :, 1][stemmask == 255] = 255
 
 for cnt in contours:
-    if cv2.contourArea(cnt) < 0.01 * maxArea:
+    area = cv2.contourArea(cnt)
+    if area < 0.01 * maxArea:
         continue
     tempimg = np.zeros_like(leafmask)
     cv2.drawContours(tempimg, [cnt], -1, 255, -1)
@@ -67,12 +69,11 @@ for cnt in contours:
         angle = angle + 90
 
     if angle > 90:
-        leaf = Leaf(centroid = (50,600), base = (600, 50))
+        leaf = Leaf(centroid = (600, 50), base = (50,600), slack = int(7 * (area/maxArea)))
     else:
-        leaf = Leaf(centroid = (50,50), base = (600, 600))
+        leaf = Leaf(centroid = (50,50), base = (600, 600), slack = int(7 * (area/maxArea)))
         
     stemDist, tempMask = getDistMask(tempimg, invert = True)
-    scaleAndShow(stemDist/stemDist.max(), 'stemDist', waitkey= 1)
     
     vizimg = leaf.isConverged(stemDist, stemDist, vizimg)
 
@@ -80,18 +81,14 @@ for cnt in contours:
 
 
 
-    
-        
+vizimg = img.copy()
+for leaf in leaves:
+    leaf.attract(leaves)
 
-
-i = 0
-
-
-while True:
-    leaf = leaves[i]
-    vizimg = leaf.isConverged(netStemDist, netStemDist, vizimg)
-    i += 1
-    i %= len(leaves)
+model = Model(leaves)
+vizimg = img.copy()
+vizimg = model.converge(vizimg, netStemDist)
+scaleAndShow(vizimg, 'stemDist', waitkey= 0)
 
 
 
