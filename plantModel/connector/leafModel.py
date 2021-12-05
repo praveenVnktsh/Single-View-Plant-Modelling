@@ -179,8 +179,8 @@ class Leaf:
                     self.stem[-1].coeffs = [1, 1]
                     leaf.stem[0].coeffs = [1, 1]
                     return
+
                 thetaval = vecSlope(leaf.stem[0].vector[0], leaf.stem[0].vector[1]) 
-                print(np.rad2deg(thetaval), np.rad2deg(theta1), np.rad2deg(theta2),  np.rad2deg(theta))
                 
                 if min(theta1, theta2) < thetaval < max(theta1, theta2):
                     if vizimg is not None:
@@ -195,7 +195,38 @@ class Leaf:
             self.stem[-1].connect(mins[0])
             self.stem[-1].coeffs = [1, 1]
             mins[0].coeffs = [1, 1]
-        
+        else:
+            theta = np.arctan2(y1 - y2, x1 - x2)
+            diff = 15
+
+            theta1 = theta + np.deg2rad(diff)
+            theta2 = theta - np.deg2rad(diff)
+            # if vizimg is not None:
+            #     cv2.line(vizimg, (int(x1), int(y1)), (int(x1 + np.cos(theta1) * 300), int(y1 + np.sin(theta1) * 300)), (255, 0, 0), 2)
+            #     cv2.line(vizimg, (int(x1), int(y1)), (int(x1 + np.cos(theta2) * 300), int(y1 + np.sin(theta2) * 300)), (255, 0, 0), 2)
+            #     # cv2.line(vizimg, (int(x1), int(y1)), (int(x1 - np.cos(theta2) * 300), int(y1 - np.sin(theta2) * 300)), (255, 0, 0), 2)
+            #     cv2.circle(vizimg, (int(x1), int(y1)), 30, (255, 0, 0), 1)
+
+
+            mins =[None, float('inf')]
+            for leaf in leaves:
+                if leaf is not self:
+                    for i in range(len(leaf.stem)):
+                        thetaval = vecSlope(leaf.stem[i].vector[0], leaf.stem[i].vector[1]) 
+                        if min(theta1, theta2) < thetaval < max(theta1, theta2):
+                            if vizimg is not None:
+                                cv2.line(vizimg, (int(x1), int(y1)), (int(leaf.stem[i].vector[0]), int(leaf.stem[i].vector[1])), (255, 0, 0), 1)
+                            dist = (leaf.stem[0].vector - self.stem[-1].vector).norm()
+                            if dist < mins[1]:
+                                mins[0] = leaf.stem[i]
+                                mins[1] = dist
+
+            print(mins[0], mins[1])
+            if mins[0] is not None and mins[1] < 200:
+                self.stem[-1].connect(mins[0])
+                self.stem[-1].coeffs = [1, 1]
+                mins[0].coeffs = [1, 1]
+
 
 
 

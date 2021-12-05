@@ -99,13 +99,15 @@ for leaf in leaves:
     if leaf.stem[-1].vector[1] < 400:
 
         leaf.attract(leaves, vizimg)
-        scaleAndShow(vizimg, 'leaf', waitkey= 0)
-    
+scaleAndShow(vizimg, 'leaf', waitkey= 1)
+cv2.imwrite(f'outputs/{loader.i}_magnets.png', vizimg)
 
 model = Model(leaves)
 vizimg = img.copy()
 vizimg = model.converge(vizimg, netStemDist)
-scaleAndShow(vizimg, 'stemDist', waitkey= 0)
+cv2.imwrite(f'outputs/{loader.i}_output.png', vizimg)
+scaleAndShow(vizimg, 'stemDist', waitkey = 0)
+
 
 
 
