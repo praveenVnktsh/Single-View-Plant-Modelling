@@ -21,7 +21,7 @@ class CustomDataset(Dataset):
         self.length = len(self.paths)
         self.transforms = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((30, 30)),
+            transforms.Resize((100, 100)),
             transforms.ToTensor(),
         ])
         

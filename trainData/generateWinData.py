@@ -17,7 +17,7 @@ os.makedirs('winData/bg/mask', exist_ok=True)
 os.makedirs('winData/bg/images', exist_ok=True)
 
 
-hWinSize = 16
+hWinSize = 50
 drawing = False
 
 
@@ -37,7 +37,7 @@ for i in range(maindic['length']):
     
     background = 255 - (stem.astype(bool) + leaves.astype(bool)).astype(np.uint8)*255
     
-    x, y, indices = sampleGrid(stem, step = 5, viz = viz)
+    x, y, indices = sampleGrid(stem, step = 15, viz = viz)
 
     image = cv2.copyMakeBorder(image, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
     stem = cv2.copyMakeBorder(stem, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
@@ -51,7 +51,7 @@ for i in range(maindic['length']):
         # cv2.waitKey(1)
         
     counters[0] += j
-    x, y, indices = sampleGrid(leaves, step = 12, viz = viz)
+    x, y, indices = sampleGrid(leaves, step = 15, viz = viz)
     lis =  list(zip(y, x))
 
     random.shuffle(lis)
@@ -77,8 +77,8 @@ for i in range(maindic['length']):
         window = image[yy : yy + hWinSize * 2, xx : xx + hWinSize * 2]
         if counters[2] + j > counters[1]:
             break
-        cv2.imwrite(f'winData/background/images/bg_{str(counters[2] + j).zfill(5)}.png', window)  
-        cv2.imwrite(f'winData/background/mask/bg_{str(counters[2] + j).zfill(5)}.png', np.zeros_like(window))  
+        cv2.imwrite(f'winData/bg/images/bg_{str(counters[2] + j).zfill(5)}.png', window)  
+        cv2.imwrite(f'winData/bg/mask/bg_{str(counters[2] + j).zfill(5)}.png', np.zeros_like(window))  
         # cv2.imshow('stem', window)
         # cv2.waitKey(1)
     
