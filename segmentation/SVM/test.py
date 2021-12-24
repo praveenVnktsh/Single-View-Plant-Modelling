@@ -49,30 +49,31 @@ def predict(image):
 
 
 if __name__ == '__main__':
-    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\testData/'
+    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
     import torch
     import os
 
     import glob
-    
-    modelname = f'RBF SVM_91_20000'
-    # modelname = 'Nearest Neighbors_90_30000'
+    import os
+    # modelname = f'RBF SVM_91_20000'
+    modelname = 'Nearest Neighbors_90_30000'
     model = torch.load(f'binary/{modelname}.pt')
+    os.makedirs(f'outputs/{modelname}/', exist_ok= True)
 
-    for path in glob.glob(base + '*.jpg'):
+    for path in glob.glob(base + '*.png'):
         img = cv2.imread(path)
-        img = cv2.resize(img, (0, 0), fx = 0.2, fy = 0.2)
+        # img = cv2.resize(img, (0, 0), fx = 0.2, fy = 0.2)
         
         stems, leaves = predict(img)
         # img[:, :, 0][leaves == 255] = 255
         # img[:, :, 2][stems == 255] = 255
-        img[:, :, 0][stems == 0] = 0
-        img[:, :, 1][stems == 0] = 0
-        img[:, :, 2][stems == 0] = 0
-        img[img == 0] =255
-        cv2.imshow('a', img)
-        cv2.imwrite(f'outputs/{modelname}_{os.path.basename(path)}', img)
-        if cv2.waitKey(0) == ord('q'):
+        # img[:, :, 0][stems == 0] = 0
+        # img[:, :, 1][stems == 0] = 0
+        # img[:, :, 2][stems == 0] = 0
+        # img[img == 0] =255
+        # cv2.imshow('a', img)
+        cv2.imwrite(f'outputs/{modelname}/{os.path.basename(path)}', stems)
+        if cv2.waitKey(1) == ord('q'):
             exit()
 
 
