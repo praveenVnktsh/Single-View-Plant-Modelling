@@ -14,8 +14,8 @@ def predict(image):
 
     mask = cv2.copyMakeBorder(mask, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
     image = cv2.copyMakeBorder(image, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
-
-    x, y, indices = sampleGrid(mask, step = 6, viz = False)
+    classWindow = 6
+    x, y, indices = sampleGrid(mask, step = classWindow, viz = False)
     leaves = np.zeros_like(mask)
     stems = np.zeros_like(mask)
     ogmask = mask.copy()
@@ -25,7 +25,7 @@ def predict(image):
     
     
 
-    classWindow = 5
+    
     for point in list(zip(y, x)):
         yy, xx = point
         window = image[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize]

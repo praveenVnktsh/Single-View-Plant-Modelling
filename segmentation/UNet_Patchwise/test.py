@@ -48,7 +48,7 @@ def predict(image, model):
 
 
 if __name__ == '__main__':
-    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\testData/'
+    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
     import torch
     import os
 
@@ -56,33 +56,33 @@ if __name__ == '__main__':
 
     model = Model.load_from_checkpoint(r'finalModel\100_epoch=99-step=12199_1.ckpt')
     model.eval()
-    for i, path in enumerate(glob.glob(base + '*.jpg')):
-        
+    for i, path in enumerate(glob.glob(base + '*.png')):
+        print(path)
         im = cv2.imread(path)
-        if i >= 2:
-            im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
-            thresh = 0.5
-            # continue
-        else:
-            im = cv2.resize(im, (0, 0), fx = 0.1, fy = 0.1)
-            thresh = 0.5
-            # continue
+        # if i >= 2:
+        #     im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
+        #     thresh = 0.5
+        #     # continue
+        # else:
+        #     im = cv2.resize(im, (0, 0), fx = 0.1, fy = 0.1)
+        #     thresh = 0.5
+        #     # continue
 
         masks, overallmask = predict(im, model)
 
-        cv2.imwrite(f'toModel/{i}_img.jpg', im)
-        cv2.imwrite(f'toModel/{i}_stem.jpg',( masks * 255).astype(np.uint8))
-        cv2.imwrite(f'toModel/{i}_mask.jpg', overallmask)
+        # cv2.imwrite(f'toModel/{i}_img.jpg', im)
+        # cv2.imwrite(f'toModel/{i}_stem.jpg',( masks * 255).astype(np.uint8))
+        # cv2.imwrite(f'toModel/{i}_mask.jpg', overallmask)
         
-        temp = im.copy()
-        temp[:, :, 2][masks > thresh] = 255
-        cv2.imwrite(f'outputs/{i}_illu.jpg', temp)
+        # temp = im.copy()
+        # temp[:, :, 2][masks > thresh] = 255
+        # cv2.imwrite(f'outputs/{i}_illu.jpg', temp)
 
-        im[:, :, 0][masks < thresh] = 255
-        im[:, :, 1][masks < thresh] = 255
-        im[:, :, 2][masks < thresh] = 255
-        cv2.imwrite(f'outputs/{i}.jpg', im)
-
+        # im[:, :, 0][masks < thresh] = 255
+        # im[:, :, 1][masks < thresh] = 255
+        # im[:, :, 2][masks < thresh] = 255
+        # cv2.imwrite(f'outputs/{i}.jpg', im)
+        cv2.imwrite(f'ious/{os.path.basename(path)}', ( masks * 255).astype(np.uint8))
         
         if cv2.waitKey(1) == ord('q'):
             exit()
