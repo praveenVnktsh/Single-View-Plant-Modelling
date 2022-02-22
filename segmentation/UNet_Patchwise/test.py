@@ -59,13 +59,15 @@ if __name__ == '__main__':
     import sys
   
     
-    if len(sys.argv) != 2: 
-        base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
+    if len(sys.argv) != 3: 
+        base = r'E:\Google/ Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
+        model_path = r'finalModel\100_epoch=99-step=12199_1.ckpt'
     else:
         base = sys.argv[1]
+        model_path = sys.argv[2]
 
 
-    model = Model.load_from_checkpoint(r'finalModel\100_epoch=99-step=12199_1.ckpt')
+    model = Model.load_from_checkpoint(model_path)
     model.eval()
     import os
 
