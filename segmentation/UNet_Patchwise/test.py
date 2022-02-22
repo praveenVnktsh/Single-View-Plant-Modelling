@@ -65,7 +65,7 @@ if __name__ == '__main__':
     else:
         base = sys.argv[1]
         model_path = sys.argv[2]
-    print('!WARNING: Only PNG works!')
+    print('!WARNING: Only PNG/JPG works!')
     print("Input Folder:", base)
     print("Model Path:", model_path)
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     os.makedirs('outputs/', exist_ok = True)
     
-    files = glob.glob(base + '*.png')
+    files = list(glob.glob(base + '*.png')) + list(glob.glob(base + '*.jpg'))
     print('Files found', files)
     for i, path in enumerate(files):
         print('Predicting', path)
