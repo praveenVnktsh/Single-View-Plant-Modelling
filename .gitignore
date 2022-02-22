@@ -1,7 +1,6 @@
 *.jpg
 *.png
 *.pt
-*.ckpt
 *.zip
 *.pyc
 *.ckpt

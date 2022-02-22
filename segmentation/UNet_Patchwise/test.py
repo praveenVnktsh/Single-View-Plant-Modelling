@@ -48,14 +48,28 @@ def predict(image, model):
 
 
 if __name__ == '__main__':
-    base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
+    
+
+
     import torch
     import os
 
     import glob
 
+    import sys
+  
+    
+    if len(sys.argv) != 2: 
+        base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
+    else:
+        base = sys.argv[1]
+
+
     model = Model.load_from_checkpoint(r'finalModel\100_epoch=99-step=12199_1.ckpt')
     model.eval()
+    import os
+
+    os.makedirs('outputs/', exist_ok = True)
     for i, path in enumerate(glob.glob(base + '*.png')):
         print(path)
         im = cv2.imread(path)
@@ -82,7 +96,7 @@ if __name__ == '__main__':
         # im[:, :, 1][masks < thresh] = 255
         # im[:, :, 2][masks < thresh] = 255
         # cv2.imwrite(f'outputs/{i}.jpg', im)
-        cv2.imwrite(f'ious/{os.path.basename(path)}', ( masks * 255).astype(np.uint8))
+        cv2.imwrite(f'outputs/{os.path.basename(path)}', ( masks * 255).astype(np.uint8))
         
         if cv2.waitKey(1) == ord('q'):
             exit()
