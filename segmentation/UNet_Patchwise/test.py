@@ -75,7 +75,10 @@ if __name__ == '__main__':
     import os
 
     os.makedirs('outputs/', exist_ok = True)
-    for i, path in enumerate(glob.glob(base + '*.png')):
+    
+    files = glob.glob(base + '*.png')
+    print('Files found', files)
+    for i, path in enumerate(files):
         print('Predicting', path)
         im = cv2.imread(path)
         # if i >= 2:
