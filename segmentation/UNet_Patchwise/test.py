@@ -65,7 +65,7 @@ if __name__ == '__main__':
     else:
         base = sys.argv[1]
         model_path = sys.argv[2]
-
+    print('!WARNING: Only PNG works!')
     print("Input Folder:", base)
     print("Model Path:", model_path)
 
