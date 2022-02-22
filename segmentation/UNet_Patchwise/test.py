@@ -66,6 +66,9 @@ if __name__ == '__main__':
         base = sys.argv[1]
         model_path = sys.argv[2]
 
+    print("Input Folder:", base)
+    print("Model Path:", model_path)
+
 
     model = Model.load_from_checkpoint(model_path)
     model.eval()
@@ -73,7 +76,7 @@ if __name__ == '__main__':
 
     os.makedirs('outputs/', exist_ok = True)
     for i, path in enumerate(glob.glob(base + '*.png')):
-        print(path)
+        print('Predicting', path)
         im = cv2.imread(path)
         # if i >= 2:
         #     im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
