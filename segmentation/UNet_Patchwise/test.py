@@ -4,7 +4,7 @@ from torchvision.transforms import transforms
 from tqdm import tqdm
 from model import Model
 def predict(image, model):
-
+    global render
     transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((100, 100)),
@@ -17,8 +17,9 @@ def predict(image, model):
     
 
     mask = grabcut(image, mask)
-    cv2.imshow('a', mask)
-    cv2.waitKey(1)
+    if render:
+        cv2.imshow('a', mask)
+        cv2.waitKey(1)
 
     hWinSize = 26
     step = 13
@@ -26,7 +27,7 @@ def predict(image, model):
     mask = cv2.copyMakeBorder(mask, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
     image = cv2.copyMakeBorder(image, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
 
-    x, y, indices = sampleGrid(mask, step = step, viz = False)
+    x, y, indices = sampleGrid(mask, step = step, viz = render)
     finalmask = np.zeros_like(mask).astype(np.float)
     mask = np.stack((mask, mask, mask), axis = 2)
 
@@ -36,8 +37,9 @@ def predict(image, model):
     for point in tqdm(list(zip(y, x))):
         yy, xx = point
         window = image[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize]
-        cv2.imshow('a', window)
-        cv2.waitKey(1)
+        if render:
+            cv2.imshow('a', window)
+            cv2.waitKey(1)
         window = transform(window).unsqueeze(0)
         pred = model(window)
         finalmask[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize] += cv2.resize((pred.squeeze().cpu().detach().numpy()), (hWinSize*2, hWinSize*2))
@@ -62,9 +64,11 @@ if __name__ == '__main__':
     if len(sys.argv) != 3: 
         base = r'E:\Google/ Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
         model_path = r'finalModel\100_epoch=99-step=12199_1.ckpt'
+        render=  True
     else:
         base = sys.argv[1]
         model_path = sys.argv[2]
+        render = False
     print('!WARNING: Only PNG/JPG works!')
     print("Input Folder:", base)
     print("Model Path:", model_path)
@@ -77,7 +81,7 @@ if __name__ == '__main__':
     os.makedirs('outputs/', exist_ok = True)
     
     files = list(glob.glob(base + '*.png')) + list(glob.glob(base + '*.jpg'))
-    print('Files found', files)
+    print(files, 'Files found')
     for i, path in enumerate(files):
         print('Predicting', path)
         im = cv2.imread(path)
@@ -105,8 +109,8 @@ if __name__ == '__main__':
         # im[:, :, 2][masks < thresh] = 255
         # cv2.imwrite(f'outputs/{i}.jpg', im)
         cv2.imwrite(f'outputs/{os.path.basename(path)}', ( masks * 255).astype(np.uint8))
-        
-        if cv2.waitKey(1) == ord('q'):
-            exit()
+        if render:
+            if cv2.waitKey(1) == ord('q'):
+                exit()
 
 
