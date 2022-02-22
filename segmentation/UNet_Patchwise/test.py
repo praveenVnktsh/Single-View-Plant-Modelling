@@ -85,6 +85,12 @@ if __name__ == '__main__':
     for i, path in enumerate(files):
         print('Predicting', path)
         im = cv2.imread(path)
+        height, width = im.shape[:2]
+        if min(height, width) == height:
+            im = cv2.resize(im, (int(width*(640/height)), 640))
+        else:
+            im = cv2.resize(im, (640, int(height*(640/width))))
+
         # if i >= 2:
         #     im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
         #     thresh = 0.5
