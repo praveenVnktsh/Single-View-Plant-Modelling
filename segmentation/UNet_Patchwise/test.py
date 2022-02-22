@@ -32,7 +32,7 @@ def predict(image, model):
     mask = np.stack((mask, mask, mask), axis = 2)
 
     
-    
+    windows = torch.tensor(image).unfold(0, 3, 3).unfold(1, 8, 8).unfold(2, 8, 8)
 
     for point in tqdm(list(zip(y, x))):
         yy, xx = point
