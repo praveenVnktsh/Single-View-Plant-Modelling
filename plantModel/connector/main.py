@@ -4,16 +4,9 @@ from leafModel import Leaf
 # from loader import Loader
 from maskLoader import Loader
 from typing import List
-from node import Node
 from utils import scaleAndShow
 import cv2
 import numpy as np
-import open3d as o3d
-import matplotlib.pyplot as plt
-import imageio
-import time
-
-from vector import Vector
 
 loader : Loader = Loader(r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\segmentation\UNet_Patchwise\toModel\old/')
 
