@@ -3,51 +3,75 @@ from functions import *
 from torchvision.transforms import transforms
 from tqdm import tqdm
 from model import Model
-def predict(image, model):
-    global render
-    transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((100, 100)),
-            transforms.ToTensor(),
-        ])
 
-
-    h, w, c = image.shape
-    mask = threshold(image, lg= np.array([25, 40, 40]), ug = np.array([86, 255, 255]))
+def loadAndProcess(im):
+    height, width = im.shape[:2]
     
 
-    mask = grabcut(image, mask)
-    if render:
-        cv2.imshow('a', mask)
-        cv2.waitKey(1)
+    if min(height, width) == height:
+        height = int(width*(640/height))
+        height -= height % step
+        im = cv2.resize(im, (height, 640))
+    else:
+        width = int(height*(640/width))
+        width -= width % step
+        im = cv2.resize(im, (640, width))
+    im = im.astype(float)/255.0
+    # mask = threshold(im, lg= np.array([25, 40, 40]), ug = np.array([86, 255, 255]))
+    # mask = grabcut(im, mask)
 
-    hWinSize = 26
-    step = 13
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    mask = cv2.copyMakeBorder(mask, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
-    image = cv2.copyMakeBorder(image, hWinSize, hWinSize, hWinSize, hWinSize, cv2.BORDER_CONSTANT)
+    height, width = im.shape[:2]
+    # transform = transforms.Compose([
+    #         transforms.ToPILImage(),
+    #         transforms.ToTensor(),
+    #     ])
+    image = im.copy()
+    im : torch.tensor = torch.tensor(im, dtype = torch.double)
 
-    x, y, indices = sampleGrid(mask, step = step, viz = render)
-    finalmask = np.zeros_like(mask).astype(np.float)
-    mask = np.stack((mask, mask, mask), axis = 2)
+    patches = im.data.unfold(0, step, step).unfold(1, step, step)
+    nh, nw = patches.shape[0:2]
+    patches  : torch.tensor= patches.flatten(start_dim=0, end_dim=1).double()
+    # patches = torch.transpose(patches, 1, 3)
+    # patches = torch.transpose(patches, 1, 2)
+    print(patches.shape)
+    return patches, image, (nh, nw)
+
+
+
+
+
+
+
+def predict(patches, model):
+    batchsize = 10
+    for i in tqdm(range(0, patches.shape[0], batchsize)):
+        p = patches[i * batchsize : (i + 1) * batchsize]
+        pred = model(p)
+    return pred
+
+
+def postProcess(pred, image, nh, nw):
+    height, width = image.shape[:2]
+    finalimg = np.zeros((height, width, 3),dtype=  np.uint8)
+
+    print(patches.numel(), finalimg.size)
 
     
-    windows = torch.tensor(image).unfold(0, 3, 3).unfold(1, 8, 8).unfold(2, 8, 8)
+    for i in range(nh):
+        for j in range(nw):
+            im :torch.tensor = patches[-(i * nw + j)]
+            im = torch.transpose(im, 0, 2)
+            im = torch.transpose(im, 0, 1)
+            im = im.numpy()
+            print(np.max(im))
+            # imm = cv2.resize(patches[i].numpy(), (0, 0), fx = 4, fy = 4)
+            finalimg[i*step:i*step+step, j*step:j*step+step] = im
+            cv2.imshow('a', (finalimg*255).astype(np.uint8))
+            if cv2.waitKey(1) == ord('q'):
+                exit()
 
-    for point in tqdm(list(zip(y, x))):
-        yy, xx = point
-        window = image[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize]
-        if render:
-            cv2.imshow('a', window)
-            cv2.waitKey(1)
-        window = transform(window).unsqueeze(0)
-        pred = model(window)
-        finalmask[yy - hWinSize : yy + hWinSize, xx - hWinSize : xx + hWinSize] += cv2.resize((pred.squeeze().cpu().detach().numpy()), (hWinSize*2, hWinSize*2))
-
-    finalmask = finalmask[hWinSize:-hWinSize, hWinSize:-hWinSize]
-    finalmask[finalmask > 1] = 1
-    return finalmask, mask[hWinSize:-hWinSize, hWinSize:-hWinSize]
-
+    # finalimg[finalimg > 1] = 1
+    return finalimg
 
 if __name__ == '__main__':
     
@@ -62,7 +86,7 @@ if __name__ == '__main__':
   
     
     if len(sys.argv) != 3: 
-        base = r'E:\Google/ Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
+        base = r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\Dataset\valdata/images/'
         model_path = r'finalModel\100_epoch=99-step=12199_1.ckpt'
         render=  True
     else:
@@ -73,8 +97,8 @@ if __name__ == '__main__':
     print("Input Folder:", base)
     print("Model Path:", model_path)
 
-
-    model = Model.load_from_checkpoint(model_path)
+    step = 100
+    model = Model.load_from_checkpoint(model_path).double()
     model.eval()
     import os
 
@@ -85,38 +109,13 @@ if __name__ == '__main__':
     for i, path in enumerate(files):
         print('Predicting', path)
         im = cv2.imread(path)
-        height, width = im.shape[:2]
-        if min(height, width) == height:
-            im = cv2.resize(im, (int(width*(640/height)), 640))
-        else:
-            im = cv2.resize(im, (640, int(height*(640/width))))
-
-        # if i >= 2:
-        #     im = cv2.resize(im, (0, 0), fx = 0.15, fy = 0.15)
-        #     thresh = 0.5
-        #     # continue
-        # else:
-        #     im = cv2.resize(im, (0, 0), fx = 0.1, fy = 0.1)
-        #     thresh = 0.5
-        #     # continue
-
-        masks, overallmask = predict(im, model)
-
-        # cv2.imwrite(f'toModel/{i}_img.jpg', im)
-        # cv2.imwrite(f'toModel/{i}_stem.jpg',( masks * 255).astype(np.uint8))
-        # cv2.imwrite(f'toModel/{i}_mask.jpg', overallmask)
+        patches, image, (nh, nw) = loadAndProcess(im)
+        preds = predict(patches, model)
+        finalImg = postProcess(patches, image, nh, nw)
+        cv2.waitKey(0)
+        exit()
+        cv2.imwrite(f'outputs/{os.path.basename(path)}', ( finalImg * 255).astype(np.uint8))
         
-        # temp = im.copy()
-        # temp[:, :, 2][masks > thresh] = 255
-        # cv2.imwrite(f'outputs/{i}_illu.jpg', temp)
-
-        # im[:, :, 0][masks < thresh] = 255
-        # im[:, :, 1][masks < thresh] = 255
-        # im[:, :, 2][masks < thresh] = 255
-        # cv2.imwrite(f'outputs/{i}.jpg', im)
-        cv2.imwrite(f'outputs/{os.path.basename(path)}', ( masks * 255).astype(np.uint8))
-        if render:
-            if cv2.waitKey(1) == ord('q'):
-                exit()
+        
 
 

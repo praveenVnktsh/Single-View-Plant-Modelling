@@ -18,7 +18,7 @@ from vector import Vector
 loader : Loader = Loader(r'E:\Google Drive\Acads\research\Single-View-Plant-Modelling\segmentation\UNet_Patchwise\toModel\old/')
 
 loader.getNextImage()
-
+render =  False
 
 
 leafmask = loader.leaves
@@ -67,7 +67,9 @@ for cnt in contours:
     if area > 0.3 * maxArea:
         t = skeletonize(tempimg)
         stemmask = removeBranches(t, stemmask)
-scaleAndShow(stemmask, waitkey=1)
+
+if render:
+    scaleAndShow(stemmask, waitkey=1)
 contours, hierarchy = cv2.findContours(stemmask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
 maxArea = 0
@@ -80,6 +82,7 @@ for cnt in contours:
 
 vizimg = img.copy()
 vizimg[:, :, 1][stemmask == 255] = 255
+print('Fitting individual elastic bands')
 for cnt in contours:
     area = cv2.contourArea(cnt)
     if area < 0.01 * maxArea:
@@ -110,23 +113,30 @@ for cnt in contours:
     )
     stemDist, tempMask = getDistMask(tempimg, invert = True)
     
-    vizimg = leaf.isConverged(stemDist, stemDist, vizimg)
+    vizimg = leaf.isConverged(stemDist, stemDist, vizimg, render = render)
 
     leaves.append(leaf)
 
-
+print('Starting attracting phase...')
 for leaf in leaves:
     if leaf.stem[-1].vector[1] < 400:
 
         leaf.attract(leaves, vizimg)
-scaleAndShow(vizimg, 'leaf', waitkey= 1)
+
+
+
+if render:
+    scaleAndShow(vizimg, 'leaf', waitkey= 1)
 cv2.imwrite(f'outputs/{loader.i}_magnets.png', vizimg)
 
 model = Model(leaves)
 vizimg = img.copy()
-vizimg = model.converge(vizimg, netStemDist)
+print('Fitting joint model')
+vizimg = model.converge(vizimg, netStemDist, render = render)
 cv2.imwrite(f'outputs/{loader.i}_output.png', vizimg)
-scaleAndShow(vizimg, 'stemDist', waitkey = 0)
+
+if render:  
+    scaleAndShow(vizimg, 'stemDist', waitkey = 0)
 
 
 

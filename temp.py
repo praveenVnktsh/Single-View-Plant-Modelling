@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import torch.nn as nn
 import cv2
+import torch.nn.functional as F
 transt = transforms.ToTensor()
 transp = transforms.ToPILImage()
 
@@ -32,15 +33,13 @@ patches = patches.flatten(start_dim=0, end_dim=1)
 patches = torch.transpose(patches, 1, 3)
 patches = torch.transpose(patches, 1, 2)
 
-# for i in range(patches.shape[0]):
-#     imm = cv2.resize(patches[i].numpy(), (0, 0), fx = 4, fy = 4)
-#     cv2.imshow('a', imm)
-#     if cv2.waitKey(10) == ord('q'):
-#         exit()
+
+
 
 finalimg = np.zeros((height, width, 3),dtype=  np.uint8)
 print(patches.numel(), finalimg.size)
 print(nh, nw)
+
 for i in range(nh):
     for j in range(nw):
         im = patches[i * nw + j].numpy()
@@ -49,8 +48,7 @@ for i in range(nh):
         cv2.imshow('a', finalimg)
         if cv2.waitKey(1) == ord('q'):
             exit()
-
-    
+   
 
 cv2.imshow('a', finalimg)
 cv2.waitKey(0)

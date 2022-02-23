@@ -149,7 +149,7 @@ class Leaf:
 
         return vizimg, distances
 
-    def attract(self, leaves, vizimg = None):
+    def attract(self, leaves, vizimg = None,):
 
         
 
@@ -224,7 +224,7 @@ class Leaf:
 
 
 
-    def isConverged(self, gradimg, stemGrad, vizimg):
+    def isConverged(self, gradimg, stemGrad, vizimg, render = True):
         i = 0
         # scaleAndShow(vizimg, waitkey=0)
         distances = []
@@ -244,7 +244,8 @@ class Leaf:
                 if np.mean(distances) < 70:
                     break
             i += 1
-            scaleAndShow(t, waitkey=1)
+            if render:
+                scaleAndShow(t, waitkey=1)
 
         return t
 

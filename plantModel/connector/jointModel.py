@@ -25,7 +25,7 @@ class Model:
         return vizimg, distance
 
         
-    def converge(self, vizimg, gradimg):
+    def converge(self, vizimg, gradimg, render = True):
         
         distances = []
         while True:
@@ -40,7 +40,7 @@ class Model:
                 distances.pop(0)
                 if np.mean(distances) < 70:
                     break
-
-            scaleAndShow(t, waitkey=1)
+            if render:
+                scaleAndShow(t, waitkey=1)
 
         return t
